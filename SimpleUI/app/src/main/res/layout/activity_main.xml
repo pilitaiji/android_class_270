@@ -24,7 +24,7 @@
         android:id="@+id/button"
         android:layout_alignWithParentIfMissing="false"
         android:onClick="submit"
-        android:background="@drawable/images"
+        android:background="@drawable/button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/radioGroup" />
@@ -49,15 +49,19 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="male"
+            android:text=""
             android:id="@+id/maleRadioButton"
-            android:checked="true" />
+            android:checked="true"
+            android:textSize="20dp"
+            android:drawableRight="@drawable/male" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="female"
+            android:text=""
             android:id="@+id/femaleRadioButton"
-            android:checked="false" />
+            android:checked="false"
+            android:textSize="20dp"
+            android:drawableRight="@drawable/female" />
     </RadioGroup>
 </RelativeLayout>
