@@ -41,16 +41,16 @@ public class DrinkOrderDialog extends DialogFragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     //* @param param1 Parameter 1.
+     //* @param param2 Parameter 2.
      * @return A new instance of fragment DrinkOrderDialog.
      */
     // TODO: Rename and change types and number of parameters
-    public static DrinkOrderDialog newInstance(String param1, String param2) {
+    public static DrinkOrderDialog newInstance(DrinkOrder drinkOrder) {
         DrinkOrderDialog fragment = new DrinkOrderDialog();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, drinkOrder.toData());
+        //args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,6 +75,11 @@ public class DrinkOrderDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (getArguments() != null) {
             Bundle bundle = getArguments();
+            String data = bundle.getString(ARG_PARAM1);
+            DrinkOrder drinkOrder = DrinkOrder.newInstanceWithData(data);
+            if (drinkOrder == null) {
+                throw new RuntimeException("Instance Drink Order Fail");
+            }
         }
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
 
@@ -87,7 +92,12 @@ public class DrinkOrderDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
-                });
+                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                
+            }
+        });
         return alertDialogBuilder.create();
     }
 
@@ -128,6 +138,6 @@ public class DrinkOrderDialog extends DialogFragment {
      */
     public interface OnDrinkOrderListener {
         // TODO: Update argument type and name
-        void onDrinkOrderFinished();
+        void onDrinkOrderFinished(DrinkOrder drinkOrder);
     }
 }
