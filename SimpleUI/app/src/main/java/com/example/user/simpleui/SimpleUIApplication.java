@@ -3,6 +3,7 @@ package com.example.user.simpleui;
 import android.app.Application;
 
 import com.parse.Parse;
+import com.parse.ParseObject;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -14,10 +15,11 @@ public class SimpleUIApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        ParseObject.registerSubclass(Order.class);
         Parse.initialize(new Parse.Configuration.Builder(this)
-                        .applicationId("76ee57f8e5f8bd628cc9586e93d428d5")
-                        .server("http://parseserver-ps662-env.us-east-1.elasticbeanstalk.com/parse/")
-                        //.clientKey("")
-                        .build());
+                .applicationId("JC0qBXVi3BOFPQ6z6AwbDsHmkUaCSbIpv2KIl2Aq")
+                .server("https://parseapi.back4app.com/")
+                .clientKey("FxmjczMf7a9mKVwxG5LcB67iDZdFh3dgLMW7QJSj")
+                .build());
     }
 }

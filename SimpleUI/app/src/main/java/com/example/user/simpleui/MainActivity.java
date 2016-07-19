@@ -16,8 +16,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
 import java.util.ArrayDeque;
@@ -83,15 +85,32 @@ public class MainActivity extends AppCompatActivity {
         setupListView();
         setupSpinner();
 
-        ParseObject parseObject = new ParseObject("Text");
-        parseObject.put("foo", "bar");
-        parseObject.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null)
-                    Toast.makeText(MainActivity.this, "上傳成功", Toast.LENGTH_LONG).show();
-            }
-        });
+//        ParseObject parseObject = new ParseObject("Text");
+//        parseObject.put("foo", "bar");
+//        parseObject.saveInBackground(new SaveCallback() {
+//            @Override
+//            public void done(ParseException e) {
+//                if (e == null)
+//                    Toast.makeText(MainActivity.this, "上傳成功", Toast.LENGTH_LONG).show();
+//            }
+//        });
+//
+//        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Text");
+//        query.findInBackground(new FindCallback<ParseObject>() {
+//            @Override
+//            public void done(List<ParseObject> objects, ParseException e) {
+//                if (e == null) {
+//                    for (ParseObject object : objects) {
+//                        Toast.makeText(MainActivity.this, object.getString("foo"), Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void done(Object o, Throwable throwable) {
+//
+//            }
+//        });
 
         Log.d("Debug", "MainActivity OnCreate");
 
@@ -101,8 +120,14 @@ public class MainActivity extends AppCompatActivity {
         //String[] data = new String[]{"black tea", "green tea", "1", "2", "3", "4", "5"};
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
 
-        OrderAdapter adapter = new OrderAdapter(this, orders);
-        listView.setAdapter(adapter);
+        Order.getOrdersFromRemote(new FindCallback<Order>() {
+            @Override
+            public void done(List<Order> objects, ParseException e) {
+                orders = objects;
+                OrderAdapter adapter = new OrderAdapter(MainActivity.this, orders);
+                listView.setAdapter(adapter);
+            }
+        });
     }
 
     public void setupSpinner() {
@@ -117,9 +142,10 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(text);
 
         Order order = new Order();
-        order.note = text;
-        order.menuResults = menuResults;
-        order.storeInfo = (String)spinner.getSelectedItem();
+        order.setNote(text);
+        order.setMenuResults(menuResults);
+        order.setStoreInfo((String) spinner.getSelectedItem());
+        order.saveInBackground();
 
         orders.add(order);
 
