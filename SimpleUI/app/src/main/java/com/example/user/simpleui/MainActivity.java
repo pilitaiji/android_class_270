@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
         orders.add(order);
 
-        //Utils.writeFile(this, "history", order.toData() + "\n");
+        Utils.writeFile(this, "history", order.toData() + "\n");
 
         editText.setText("");
         menuResults = "";
