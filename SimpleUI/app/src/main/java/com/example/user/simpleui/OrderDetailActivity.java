@@ -16,12 +16,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.logging.Handler;
 
-public class OrderDetailActivity extends AppCompatActivity {
+public class OrderDetailActivity extends AppCompatActivity implements GeoCodingTask.GeoCodingResponse{
 
     GoogleMap googleMap;
 
@@ -69,6 +71,17 @@ public class OrderDetailActivity extends AppCompatActivity {
         if (googleMap != null) {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latlng, 17);
 //            googleMap.animateCamera(cameraUpdate);
+            MarkerOptions markerOptions = new MarkerOptions().position(latlng).title("台灣大學").snippet("Hello Google Map");
+            googleMap.addMarker(markerOptions);
+            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    CameraUpdate cp = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 21);
+                    googleMap.moveCamera(cp);
+                    //googleMap.animateCamera(cp);
+                    return false;
+                }
+            });
             googleMap.moveCamera(cameraUpdate);
         }
     }
