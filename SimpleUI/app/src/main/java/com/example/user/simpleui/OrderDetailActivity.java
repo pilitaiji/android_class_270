@@ -201,6 +201,40 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
         } else {
             marker.setPosition(currentLatLng);
         }
+
+        if (polylines.size() > 0) {
+            for (Polyline polyline : polylines) {
+                List<LatLng> points = polyline.getPoints();
+
+                int index = -1;
+
+                for (int i = 0 ; i < points.size(); i++) {
+                    if (i != points.size() -1) {
+                        LatLng point1 = points.get(i);
+                        LatLng point2 = points.get(i + 1);
+
+                        Double maxLat = Math.max(point1.latitude, point2.latitude) + 0.0001;
+                        Double minLat = Math.min(point1.latitude, point2.latitude) - 0.0001;
+                        Double maxLng = Math.max(point1.latitude, point2.latitude) + 0.0001;
+                        Double minLng = Math.min(point1.latitude, point2.latitude) - 0.0001;
+                        if (currentLatLng.latitude >= minLat && currentLatLng.latitude < maxLat && currentLatLng.longitude >= minLng && currentLatLng.longitude < maxLng) {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (index != -1) {
+                    for (int i = index - 1; i >= 0; i--) {
+                        points.remove(0);
+                    }
+
+                    points.set(0, currentLatLng);
+                    polyline.setPoints(points);
+                }
+            }
+            //polylines.clear();
+        }
     }
 
     @Override
@@ -232,37 +266,7 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
     @Override
     public void onRoutingSuccess(ArrayList<Route> routes, int i) {
 
-        if (polylines.size() > 0) {
-            for (Polyline polyline : polylines) {
-                polyline.remove();
 
-                for (int i = 0 ; i < points.size(); i++) {
-                    if (i != points.size() -1) {
-                        LatLng point1 = points.get(i);
-                        LatLng point2 = points.get(i + 1);
-
-                        Double maxLat = Math.max(point1.latitude, point2.latitude);
-                        Double minLat = Math.min(point1.latitude, point2.latitude);
-                        Double maxLng = Math.max(point1.latitude, point2.latitude);
-                        Double minLng = Math.min(point1.latitude, point2.latitude);
-                        if (currentLatLng.latitude >= ninLat && currentLatLag.latitude < maxLat && currentLatLng) {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-
-                if (index != -1) {
-                    for (int i = index - 1; i >= 0; i--) {
-                        points.remove = 0;
-                    }
-
-                    points.set(0, currentLatLng);
-                    polyline.;
-                }
-            }
-            polylines.clear();
-        }
 
         for (int index = 0; index < routes.size() ; index++) {
             List<LatLng> points = routes.get(index).getPoints();
