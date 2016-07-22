@@ -5,7 +5,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Camera;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.location.Location;
+
+import com.directions.route.AbstractRouting;
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
+import com.google.android.gms.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -17,6 +26,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,17 +36,27 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
 
-public class OrderDetailActivity extends AppCompatActivity implements GeoCodingTask.GeoCodingResponse, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class OrderDetailActivity extends AppCompatActivity implements GeoCodingTask.GeoCodingResponse, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, RoutingListener {
 
     final static int ACCESS_FINE_LOCATION_REQUEST_CODE = 1;
 
     GoogleMap googleMap;
     GoogleApiClient googleApiClient;
+    LocationRequest locationRequest;
+
+    LatLng storeLocation;
+
+    Marker marker;
+
+    List<Polyline> polylines = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +113,7 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
                     return false;
                 }
             });
+            storeLocation = latlng;
             //googleMap.moveCamera(cameraUpdate);
             createGoogleAPIClient();
         }
@@ -117,6 +138,12 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
             return;
         }
 
+        createLocationRequest();
+
+        if (locationRequest != null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
+
         Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
         LatLng start = new LatLng(25.0186348, 121.5398379);
@@ -124,6 +151,13 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
             start = new LatLng(location.getLatitude(), location.getLongitude());
         }
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 17));
+
+        Routing routing = new Routing.Builder()
+                .travelMode(AbstractRouting.TravelMode.WALKING)
+                .waypoints(start, storeLocation)
+                .withListener(this)
+                .build();
+        routing.execute();
     }
 
     @Override
@@ -144,6 +178,107 @@ public class OrderDetailActivity extends AppCompatActivity implements GeoCodingT
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    private void createLocationRequest() {
+        if (locationRequest == null) {
+            locationRequest = new LocationRequest();
+            locationRequest.setInterval(1000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17));
+
+        if (marker == null) {
+            MarkerOptions markerOptions = new MarkerOptions().position(currentLatLng).title("現在位置").snippet("Hello Google Map");
+            marker = googleMap.addMarker(markerOptions);
+        } else {
+            marker.setPosition(currentLatLng);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (googleApiClient != null) {
+            googleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public void onRoutingFailure(RouteException e) {
+
+    }
+
+    @Override
+    public void onRoutingStart() {
+
+    }
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> routes, int i) {
+
+        if (polylines.size() > 0) {
+            for (Polyline polyline : polylines) {
+                polyline.remove();
+
+                for (int i = 0 ; i < points.size(); i++) {
+                    if (i != points.size() -1) {
+                        LatLng point1 = points.get(i);
+                        LatLng point2 = points.get(i + 1);
+
+                        Double maxLat = Math.max(point1.latitude, point2.latitude);
+                        Double minLat = Math.min(point1.latitude, point2.latitude);
+                        Double maxLng = Math.max(point1.latitude, point2.latitude);
+                        Double minLng = Math.min(point1.latitude, point2.latitude);
+                        if (currentLatLng.latitude >= ninLat && currentLatLag.latitude < maxLat && currentLatLng) {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (index != -1) {
+                    for (int i = index - 1; i >= 0; i--) {
+                        points.remove = 0;
+                    }
+
+                    points.set(0, currentLatLng);
+                    polyline.;
+                }
+            }
+            polylines.clear();
+        }
+
+        for (int index = 0; index < routes.size() ; index++) {
+            List<LatLng> points = routes.get(index).getPoints();
+
+            PolylineOptions polylineOptions = new PolylineOptions();
+            polylineOptions.addAll(points);
+            polylineOptions.color(Color.GREEN);
+            polylineOptions.width(10);
+
+            Polyline polyline = googleMap.addPolyline(polylineOptions);
+            polylines.add(polyline);
+        }
+    }
+
+    @Override
+    public void onRoutingCancelled() {
 
     }
 
